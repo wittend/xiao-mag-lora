@@ -34,18 +34,16 @@ A field-deployable LoRa mesh radio node:
 - Provisioning flow: WiFi/BT + FPC antenna for config at deploy time;
   node then runs on LoRa + solar + GNSS.
 
-## 3. Power Subsystem (needs discussion)
+## 3. Power Subsystem (decided 2026-10-24)
 
-- 4× 18650 **LiFePO4** (3.2 V/cell) → 4S pack, 12.8 V nominal, 14.6 V max
-  charge.
-- Solar panel Voc must stay under the charge controller's input limit;
-  controller must support 4S LiFePO4 (or be an MPPT 12 V type). Options:
-  - Adapt a **SenseCAP Solar Node P1-Pro** (has solar + LiFePO4 + charge
-    mgmt, Meshtastic-friendly) — fastest path, but battery is fixed-size.
-  - Small-footprint panel + dedicated 4S LiFePO4 BMS/charge controller from
-    Seeed or equivalent — more custom, more cell capacity.
-- (OPEN) Panel W rating vs. average sun hours on site; target runtime
-  without sun (days) — these two numbers drive panel size and BMS choice.
+- **Decision: adapt the SenseCAP Solar Node P1-Pro.** It already uses 4× 18650
+  LiFePO4 cells (matches the requirement to manage four 18650 cells), provides
+  solar charge management, and is Meshtastic-friendly.
+- **Solar panel:** 16–20 W class, ~18 V peak (Vmp/Voc to be confirmed from the
+  selected panel's datasheet). Sized for **≥ 2–3 days sunless autonomy** at
+  expected duty cycle (LoRa TX every N min + GNSS fix cadence).
+  - Autonomy math to be added once the duty cycle / sleep schedule is fixed in
+    firmware (see open questions).
 
 ## 4. Mechanical
 
@@ -57,14 +55,14 @@ A field-deployable LoRa mesh radio node:
 
 ## 5. Open Questions
 
-1. Solar panel peak voltage / wattage — site-specific; needs the two numbers
-   above (panel W, sunless-autonomy days).
-2. Charge controller: off-the-shelf 4S LiFePO4 BMS/MPPT vs. SenseCAP P1-Pro
-   adaptation.
+1. ~~Solar panel W / autonomy~~ — decided: 16–20 W, ~18 V peak, 2–3 days.
+2. ~~Charge controller~~ — decided: SenseCAP P1-Pro (4× 18650 LiFePO4).
 3. Wio-S3 LoRa radio part + band (US915) confirmation.
 4. L76K interface pins on the Wio-S3 (shared UART?) — check datasheet.
-5. Toolchain: Arduino, PlatformIO, or ESP-IDF (Meshtastic builds via
-   PlatformIO by default — leans PlatformIO).
+5. Exact P1-Pro ↔ Wio-S3 power/interface wiring (P1-Pro is itself an
+   ESP32-S3 node — decide which unit runs the mesh role and how they
+   share GNSS/data).
+6. Duty cycle / sleep schedule (drives the autonomy math).
 
 ## 6. Procurement Note
 

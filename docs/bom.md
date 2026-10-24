@@ -1,6 +1,6 @@
 # Bill of Materials
 
-*Draft v0.1 — prices/stock unverified. Check Seeed US warehouse stock before
+*Draft v0.2 — prices/stock unverified. Check Seeed US warehouse stock before
 ordering. (VERIFY) = spec to confirm against datasheet.*
 
 ## Radio & Compute
@@ -15,28 +15,27 @@ ordering. (VERIFY) = spec to confirm against datasheet.*
 
 | # | Item | Qty | Notes |
 |---|------|-----|-------|
-| 4 | Solar panel (W TBD) | 1 | Size per site sun hours — OPEN Q1 |
-| 5 | 4S LiFePO4 charge controller / BMS (or SenseCAP Solar Node P1-Pro) | 1 | Must handle 14.6 V pack — OPEN Q2 |
-| 6 | 18650 LiFePO4 cells (3.2 V) | 4 | Verify holder/connector choice |
-| 7 | 12.8 V → 5 V step-down (buck) converter | 1 | For Wio-S3 VBUS; sized for LoRa TX peaks |
-| 8 | Wires, connectors, fuses, XT30/JST as needed | 1 set | |
+| 4 | Solar panel 16–20 W class, ~18 V peak | 1 | Sized for ≥2–3 days sunless; confirm Vmp/Voc from datasheet |
+| 5 | SenseCAP Solar Node P1-Pro (4× 18650 LiFePO4, solar charge mgmt) | 1 | Power subsystem — decided; includes cells |
+| 6 | 12.8 V → 5 V step-down (buck) converter | 1 | For Wio-S3 VBUS; sized for LoRa TX peaks |
+| 7 | Wires, connectors, fuses, XT30/JST as needed | 1 set | |
 
 ## Enclosure & Mounting
 
 | # | Item | Qty | Notes |
 |---|------|-----|-------|
-| 9 | 2" PVC Sch 40 pipe (cut length TBD) | 1 | Main housing |
-| 10 | 2" PVC end caps | 2 | Cemented + gasketed |
-| 11 | PVC cement | 1 | |
-| 12 | 1"–1.5" PVC Sch 40 pipe + end caps (mounting) | 1 set | Pole/mast mount |
-| 13 | Antenna feed-through glands + RTV | 2+ | SMA penetration sealing |
+| 8 | 2" PVC Sch 40 pipe (cut length TBD) | 1 | Main housing |
+| 9 | 2" PVC end caps | 2 | Cemented + gasketed |
+| 10 | PVC cement | 1 | |
+| 11 | 1"–1.5" PVC Sch 40 pipe + end caps (mounting) | 1 set | Pole/mast mount |
+| 12 | Antenna feed-through glands + RTV | 2+ | SMA penetration sealing |
 
 ## Consumables / Bench
 
 | # | Item | Qty | Notes |
 |---|------|-----|-------|
-| 14 | SMA LoRa antenna 915 MHz (or whip) | 2 | External LoRa antenna (not in original list — added) |
-| 15 | USB-C cables (Wio-S3 uses USB-C) | 2 | Flashing/diagnostics |
-| 16 | RTV silicone, gasket material | 1 set | Weather sealing |
+| 13 | SMA LoRa antenna 915 MHz (or whip) | 2 | External LoRa antenna (added — not in original list) |
+| 14 | USB-C cables (Wio-S3 uses USB-C) | 2 | Flashing/diagnostics |
+| 15 | RTV silicone, gasket material | 1 set | Weather sealing |
 
-**Total items: 16 rows / ~20 physical parts (two-node pair + spares TBD).**
+**Total: 15 line items** (two-node pair + spares TBD).

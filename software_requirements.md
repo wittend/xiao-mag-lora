@@ -3,8 +3,8 @@
 ## Firmware (on-node)
 
 - **MCU:** ESP32-S3 (Wio-S3 Wireless LoRa, XIAO form factor)
-- **Toolchain (working decision):** PlatformIO — Meshtastic's official build
-  path; revisit if ESP-IDF-level work becomes necessary.
+- **Toolchain (decided):** PlatformIO — Meshtastic's official build
+  path. ESP-IDF only if lower-level work becomes necessary.
 - **Base firmware:** Meshtastic (provides LoRa mesh, telemetry, web client,
   position handling). Fork/customize for:
   - L76K GNSS integration (position fix → mesh position broadcasts)
@@ -47,8 +47,10 @@
 
 ## Repository & Environments
 
-- Repo root: `xiao-mag-lora` (this directory). Git initialized; GitHub remote
-  pending (confirm access/remote with client before pushing).
+- Repo root: `xiao-mag-lora` (this directory). Git initialized.
+  - **Local dev remote (Gitea):** `gitea@10.0.0.199:dave/xiao-mag-lora.git` (push-to-create done)
+  - **Source of truth (GitHub):** `wittend/xiao-mag-lora` — remote to be added
+    once the GitHub repo exists (client confirms creation).
 - Environments:
   - Dev: host machine, USB-connected node(s)
   - Field: deployed node(s), power via solar, no host PC at the site

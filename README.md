@@ -35,7 +35,7 @@ stack and a single-page web app for testing and monitoring.
 - [x] Repository structure initialized
 - [x] Hardware strategy draft
 - [x] Bill of Materials draft
-- [ ] Toolkit selection (Arduino / PlatformIO / ESP-IDF)
+- [x] Toolkit selection — PlatformIO (confirmed)
 - [ ] Firmware build & test
 - [ ] Client control software
 - [ ] SPA web app
