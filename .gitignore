@@ -1,0 +1,29 @@
+# Build artifacts
+dist/*
+!dist/.gitkeep
+*.o
+*.a
+*.elf
+*.bin
+*.uf2
+
+# Toolchains
+.pio/
+build/
+node_modules/
+target/
+
+# KiCad temp
+kicad/*.sch~
+kicad/*.kicad_prl
+*.lck
+
+# OS / editor
+.DS_Store
+*~
+.swp
+
+# Secrets
+*.key
+*.pem
+.env
