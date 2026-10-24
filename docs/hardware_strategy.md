@@ -36,17 +36,18 @@ PlatformIO application:
   clock). Symmetric firmware with a role flag is preferred (either Wio-S3
   can be either endpoint).
 - **Link layer:** fixed **8-byte header** (magic, seq, type, CCITT-CRC field,
-  reserved) + payload. **The payload is the telemetry record itself**
-  (see §3 item 2). Best-effort delivery with sequence-gap detection; ACK only for
+  reserved) + payload. **The payload is the telemetry record itself, compact
+  binary, 3-decimal fixed-point — 26 B frame (spec: `docs/payload_format.md`).**
+  Best-effort delivery with sequence-gap detection; ACK only for
   provisioning/command frames (ACKs also consume TX duty).
 - **Frequency/channel plan (US915):** 2–4 pre-configured channels per site
   (e.g., 915.9 / 916.1 / 916.3 / 916.5 MHz) so multiple P2P links in the same
   area don't collide; no dynamic frequency planning (that's LoRaWAN's job).
   Channels provisioned at deploy via WiFi/BT.
 - **Data rates (constrained by the 1 pkt/s budget — see §3):** SF9 default
-  (438 ms for the 88 B JSON frame — fits a 1 s slot); SF7–SF8 for short/bench
-  links. SF10 is possible only with the compact binary encoding (401 ms,
-  §3 item 2). SF11+ is **excluded**: airtime exceeds one 1 s slot.
+  (213 ms for the 26 B binary frame — fits a 1 s slot with ~787 ms spare);
+  SF10 (401 ms) for long links; SF7–SF8 for short/bench. SF11+ is **excluded**:
+  airtime exceeds one 1 s slot.
 - **Duty cycle:** FCC Part 15 (902–928 MHz) caps TX at **1 %** — continuous
   1 pkt/s is *not* compliant at any SF. 1 pkt/s runs only inside
   duty-limited acquisition windows (§3 item 3).
@@ -61,13 +62,13 @@ Typical packet (client example):
     { "ts":"26 Oct 2025 14:20:00", "rt":23.125, "x":12345.678,
       "y":-234.500, "z":987.001 }
 
-1. **Throughput.** At 1 pkt/s this is ~704 bps raw / ~640 bps useful with
-   the 88 B JSON frame (~190 bps useful with the 26 B binary frame).
-2. **Wire format — two options (client to decide, open Q7).** The record as
-   JSON is 80 B (88 B with header); a compact fixed-point binary encoding of
-   the same five fields is 18 B (26 B with header): 4 B epoch-seconds `ts`,
-   2 B `rt` ×1000, 4 B each of `x`/`y`/`z` ×1000 (scales to confirm — open
-   Q8). Airtime @125 kHz, header included:
+1. **Throughput.** At 1 pkt/s the 26 B frame is 208 bps raw / **144 bps
+   useful** (18 B payload). The application is designed against that budget.
+   *(88 B JSON reference: 704 / 640 bps — see `docs/calculations.md` §B.)*
+2. **Wire format — DECIDED: compact binary, 3-decimal fixed-point** (spec in
+   `docs/payload_format.md`): 8 B header + 4 B epoch-seconds `ts` + 2 B `rt`
+   ×1000 + 4 B each of `x`/`y`/`z` ×1000 = **26 B frame**. JSON remains the
+   host-side representation. Airtime @125 kHz:
 
    | Frame       | SF7      | SF8      | SF9      | SF10      |
    |-------------|----------|----------|----------|-----------|
@@ -76,16 +77,17 @@ Typical packet (client example):
 3. **Regulatory ceiling — the hard constraint.** FCC Part 15 (902–928 MHz)
    allows ≤ 1 % TX duty = 0.6 s airtime per minute. Minimum possible
    airtime per packet is ~59 ms (26 B @ SF7) → **continuous 1 pkt/s is
-   non-compliant at every spreading factor** (6–44 % duty). With the 88 B
-   JSON frame @ SF9 (438 ms), the link may run 1 pkt/s for **≤ ~1 s in any
-   minute** (≈ 14 s per 10 min); with binary @ SF9 (213 ms), ≤ ~2 s per
-   minute. ⇒ The 1 pkt/s rate is achievable only in duty-limited
+   non-compliant at every spreading factor** (5.9–44 % duty). With the 26 B
+   frame: SF9 (213 ms) allows **≤ ~2 s of 1 pkt/s per minute**; SF10 (401 ms)
+   ~1.5 s per minute. ⇒ The 1 pkt/s rate is achievable only in duty-limited
    **acquisition windows**; nominal window length is open question Q9 and
    drives autonomy, ingest buffering, and compliance.
 4. **No retransmission storms.** Lost packets are not auto-retried at line
    rate (retries would blow both the 1 s slot and the duty budget); the link
    layer uses sequence numbers + best-effort, with optional single ACK for
    critical/config frames only. Application-level cadence absorbs loss.
+
+   *All derivations and estimates: `docs/calculations.md` (appendix)."
 
 ## 4. Power Subsystem (decided 2026-10-24)
 
@@ -119,11 +121,11 @@ Typical packet (client example):
    radio stays disabled and how 5 V is tapped for the Wio-S3.)
 6. ~~Duty cycle / sleep profile~~ — resolved by the 1 pkt/s + 1 % duty
    analysis in §3 item 3; remaining gap is Q9 below.
-7. **Wire format (client decision):** JSON as-given (88 B frame, SF9 max)
-   vs compact binary (26 B frame, SF10 possible).
-8. **Binary field scales (if Q7 = binary):** units and ranges of `rt`, `x`,
-   `y`, `z` (3-decimal fixed-point assumed) and `ts` precision (epoch
-   seconds assumed).
+7. ~~Wire format~~ — **decided: binary, 3-decimal fixed-point.** 26 B frame,
+   full spec in `docs/payload_format.md` (SF10 now available for long links).
+8. ~~Binary field scales~~ — **decided: 3-decimal fixed-point** (×1000).
+   Residual to verify at acceptance: `rt` unsigned 0–65.535, x/y/z within
+   int32×1000 range, second-resolution `ts`.
 9. **Acquisition-window length (client):** how long must the link sustain
     1 pkt/s (seconds per window, windows per hour)? Drives compliance, TX
     energy/autonomy math, and host ingest buffering.

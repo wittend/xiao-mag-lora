@@ -24,7 +24,7 @@ testing and monitoring.
 | Path       | Purpose                                                      |
 | ---------- | ------------------------------------------------------------ |
 | `assets/`  | Datasheets, reference PDFs, images, board renderings         |
-| `docs/`    | Strategy, BOM, design notes, test plans                      |
+| `docs/`    | Strategy, BOM, payload spec, calculations appendix, test plans |
 | `src/`     | Firmware + client software source (per-language subfolders)  |
 | `dist/`    | Build artifacts and packaged releases                        |
 | `kicad/`   | KiCad hardware design (carrier/support board)                |
@@ -37,6 +37,7 @@ testing and monitoring.
 - [x] Hardware strategy draft
 - [x] Bill of Materials draft
 - [x] Toolkit selection — PlatformIO (confirmed)
+- [x] Wire format — binary, 3-decimal fixed-point (26 B frame)
 - [ ] Firmware build & test
 - [ ] Client control software
 - [ ] SPA web app

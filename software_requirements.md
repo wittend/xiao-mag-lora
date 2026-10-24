@@ -10,9 +10,9 @@
   SX1262-class radio in direct mode (no LoRaWAN MAC). Features:
   - Role flag: transmitter (sends the telemetry record) vs receiver/host-side
   - Custom framed datagrams: fixed 8 B header (magic, seq, type, CCITT-CRC
-    field) + the telemetry record (`ts`, `rt`, `x`, `y`, `z`) as JSON (88 B
-    frame) or compact binary (26 B frame) — wire format is open question Q7
-    in hardware_strategy.md §3; **1 packet/sec per direction inside
+    field) + the telemetry record (`ts`, `rt`, `x`, `y`, `z`) as **compact
+    binary, 3-decimal fixed-point — 26 B frame** (decided; spec in
+    `docs/payload_format.md`). **1 packet/sec per direction inside
     duty-limited acquisition windows** (FCC 1 % TX duty); best-effort with
     sequence-gap detection, optional single ACK for config frames only (no
     line-rate retry)
@@ -21,8 +21,8 @@
   - Deep-sleep duty cycle synced to solar charge state
   - (VERIFY) exact pin map for LoRa SPI, GNSS UART, battery sense
 - **Radio config:** US915, 2–4 provisioned channels per site (915.9–916.5
-  MHz), **SF9 default; SF7–SF8 for short/bench links; SF10 only with the
-  binary encoding** (401 ms fits the 1 s slot); SF11+ excluded. 1 pkt/s is
+  MHz), **SF9 default (213 ms); SF10 (401 ms) for long links; SF7–SF8
+  short/bench**; SF11+ excluded (exceeds the 1 s slot). 1 pkt/s is
   non-compliant continuously under FCC 1 % TX duty — runs inside
   acquisition windows (length: open question Q9). No LoRaWAN, no mesh.
 
@@ -36,7 +36,8 @@
   - Node provisioning (region/channel/keys), firmware update, diagnostics
   - Telemetry ingest: the record stream at 1 pkt/s during acquisition
     windows, plus node health (battery/charge state, link quality,
-    temperature); decode binary frames to JSON for logging/SPA if Q7 = binary
+    temperature); decode 26 B binary frames to JSON for logging/SPA (spec in
+    `docs/payload_format.md`)
   - Store history (SQLite is a reasonable default — decision to confirm)
 - **Deliverable shape:** single static binary preferred (Go or Rust) to
   minimize distribution pain.
