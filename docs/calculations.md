@@ -41,8 +41,10 @@ The application is designed against **144 useful bits/sec**.
 
 ## C. FCC Part 15 duty cycle (902–928 MHz)
 
-Limit: **1 % TX duty = 0.6 s airtime per minute** (47 CFR §15.247(d)(4)(iii),
-also 1 W conducted / 30 dBm EIRP — well above our ~20 dBm TX).
+Limit: **1 % TX duty = 0.6 s airtime per minute** (47 CFR §15.247(d)(4)(iii) —
+applies to *frequency-hopping and spread-spectrum* transmitters; LoRa CSS is
+spread spectrum, so it binds. Also 1 W conducted / 30 dBm EIRP — well above
+our ~20 dBm TX).
 
 Sustainable cadence, 26 B frame:
 
@@ -50,15 +52,27 @@ Sustainable cadence, 26 B frame:
 |----|---------|---------------|---------------------------|
 | SF7 | 59 ms | 10.1 pkts/min | ~1 s |
 | SF8 | 111 ms | 5.4 pkts/min | ~1 s |
-| SF9 | 213 ms | 2.8 pkts/min | **≤ ~2 s** |
+| SF9 | 213 ms | 2.8 pkts/min | **~2.8 s** |
 | SF10 | 401 ms | 1.5 pkts/min | ~1.5 s |
 
-⇒ Continuous 1 pkt/s is non-compliant at every SF (minimum airtime alone is
-5.9 % duty). 1 pkt/s operates only inside duty-limited acquisition windows
-(length = open question Q9; the table bounds how much 1-pkt/s time each SF
-allows per minute).
+⇒ **Continuous/sustained 1 pkt/s is non-compliant at every SF** (minimum
+airtime alone is 5.9 % duty — a hard floor). 1 pkt/s operates only inside
+duty-limited acquisition windows (length = open question Q10).
+
+**Sustained-1-pkt/s alternatives (same Wio-S3 board, per strategy §3a):**
+
+| Option | basis | 26 B packet airtime | duty limit | range vs SF9 |
+|--------|-------|--------------------|------------|--------------|
+| GFSK 9.6 kbps, 902–928 MHz | §15.247(c), 50 mW TPO | ≈ 30 ms | **none** (not spread spectrum) | ~10–30× less |
+| WiFi 2.4 GHz | §15.407 | negligible | none (PSD-limited) | needs base/infra |
+
+GFSK sensitivity ≈ −115 dBm vs −147 dBm (SF9) → ~32 dB of lost link margin
+≈ 10–30× range. If the client needs sustained 1 pkt/s *and* km-scale range,
+no Wio-S3 path satisfies both.
+
 
 ## D. Link budget estimate (FSPL, 915 MHz)
+
 
 ```
 FSPL(dB) = 32.45 + 20·log10(f_MHz) + 20·log10(d_km)
@@ -122,7 +136,8 @@ Residual assumptions (flagged in `payload_format.md`): `rt` unsigned
 
 | Change | Effect |
 |--------|--------|
-| Q9 window length finalized | updates E (autonomy) and C (compliance envelope) |
+| Q9 (sustained vs windowed) | if sustained → physical-layer change (§3a: GFSK/WiFi), not LoRa SF |
+| Q10 window length (if windowed) | updates E (autonomy) and C (compliance envelope) |
 | `rt` needs negatives / > 65.535 | frame → 30 B; SF10 airtime → ~460 ms (still fits 1 s) |
 | BW raised to 250 kHz | airtimes halve → more 1-pkt/s time per minute, less range |
 | Measured Wio-S3/P1-Pro currents | replaces E's assumptions with data |

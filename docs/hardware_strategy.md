@@ -87,7 +87,29 @@ Typical packet (client example):
    layer uses sequence numbers + best-effort, with optional single ACK for
    critical/config frames only. Application-level cadence absorbs loss.
 
-   *All derivations and estimates: `docs/calculations.md` (appendix)."
+   *All derivations and estimates: `docs/calculations.md` (appendix).*
+
+### 3a. Pivotal decision — sustained vs windowed 1 pkt/s
+
+Sustained 1 pkt/s is **unachievable on US915 LoRa at any SF** (minimum
+possible duty 5.9 % vs 1 % limit — a hard floor, not tunable). The protocol
+survives **only if** 1 pkt/s is required *during acquisition windows* (SF9:
+28 pkts/min, ~2.8 s of 1-pkt-s per minute). If the client requires
+**sustained 24/7** 1 pkt/s, the physical layer must change — the 1 % duty
+binds *spread-spectrum* transmitters only, and the same Wio-S3 board covers
+both alternatives:
+
+- **GFSK/FSK narrowband, 902–928 MHz** (SX1262 does GFSK natively): falls
+  under §15.247(c), 50 mW TPO, **no duty-cycle limit**. 26 B @ 9.6 kbps ≈
+  30 ms airtime → continuous 1 pkt/s compliant. Cost: ~10–30× less range
+  than SF9 (no processing gain; ≈ −115 dBm vs −147 dBm).
+- **2.4 GHz WiFi** (on-board): no duty-cycle limit, but an infrastructure
+  link (needs a base/coverage), not a direct P2P radio path.
+
+⇒ **Client question (decides the physical layer):** sustained or windowed?
+If sustained **and** km-scale range is required, no single Wio-S3 path
+satisfies both and the project should stop. See `docs/calculations.md` §C.
+
 
 ## 4. Power Subsystem (decided 2026-10-24)
 
@@ -126,9 +148,13 @@ Typical packet (client example):
 8. ~~Binary field scales~~ — **decided: 3-decimal fixed-point** (×1000).
    Residual to verify at acceptance: `rt` unsigned 0–65.535, x/y/z within
    int32×1000 range, second-resolution `ts`.
-9. **Acquisition-window length (client):** how long must the link sustain
-    1 pkt/s (seconds per window, windows per hour)? Drives compliance, TX
-    energy/autonomy math, and host ingest buffering.
+9. **PIVOTAL (client) — sustained or windowed 1 pkt/s?** Sustained 24/7
+    is unachievable on US915 LoRa (§3a) and forces a physical-layer change
+    (GFSK narrowband or WiFi — same board). Windowed keeps the LoRa design.
+    This single answer decides the protocol; confirm before any bench work.
+10. **Acquisition-window length (if windowed, client):** how long must the
+    link sustain 1 pkt/s (seconds per window, windows per hour)? Drives
+    compliance, TX energy/autonomy math, and host ingest buffering.
 
 ## 7. Procurement Note
 
