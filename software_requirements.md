@@ -49,8 +49,7 @@
 
 - Repo root: `xiao-mag-lora` (this directory). Git initialized.
   - **Local dev remote (Gitea):** `gitea@10.0.0.199:dave/xiao-mag-lora.git` (push-to-create done)
-  - **Source of truth (GitHub):** `wittend/xiao-mag-lora` — remote to be added
-    once the GitHub repo exists (client confirms creation).
+  - **Source of truth (GitHub):** `https://github.com/wittend/xiao-mag-lora` (public) — `git@github.com:wittend/xiao-mag-lora.git`
 - Environments:
   - Dev: host machine, USB-connected node(s)
   - Field: deployed node(s), power via solar, no host PC at the site
