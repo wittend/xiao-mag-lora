@@ -9,13 +9,18 @@
 - **Firmware: custom point-to-point LoRa data link.** Drives the onboard
   SX1262-class radio in direct mode (no LoRaWAN MAC). Features:
   - Role flag: sensor/transmitter (GNSS + telemetry) vs receiver/host-side
-  - Custom framed datagrams (magic, seq, type, CRC) + keepalive, optional
-    ACK/retry
+  - Custom framed datagrams: fixed 8 B header (magic, seq, type, CCITT-CRC
+    field) + payload; **1 packet/sec max per direction, 32 B payload default
+    (16 B GNSS-min, 64 B hard max ≤ SF9)**; best-effort with sequence-gap
+    detection, optional single ACK for config frames only (no line-rate
+    retry — see hardware_strategy.md §3 data-rate budget)
   - L76K GNSS: position fix embedded in telemetry payload
   - Deep-sleep duty cycle synced to solar charge state
   - (VERIFY) exact pin map for LoRa SPI, GNSS UART, battery sense
 - **Radio config:** US915, 2–4 provisioned channels per site (915.9–916.5
-  MHz), SF7–SF12 selectable per link class. No LoRaWAN, no mesh.
+  MHz), **SF7–SF10 only** (SF9 default; SF11+ exceeds the 1 s slot).
+  Duty-cycled operation per FCC 1 % TX duty: sustained 1 pkt / 25–45 s or
+  burst windows — profile confirmed with client. No LoRaWAN, no mesh.
 
 ## Client-side (Linux host)
 
