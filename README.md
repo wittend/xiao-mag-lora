@@ -1,8 +1,9 @@
 # xiao-mag-lora
 
-Solar-powered, GNSS-enabled LoRa mesh radio node built on Seeed Studio
-XIAO ESP32-S3 (Wio-S3 Wireless LoRa) hardware, with a Linux host-side control
-stack and a single-page web app for testing and monitoring.
+Solar-powered, GNSS-enabled **point-to-point LoRa data link** (not LoRaWAN,
+not mesh) built on Seeed Studio XIAO ESP32-S3 (Wio-S3 Wireless LoRa)
+hardware, with a Linux host-side control stack and a single-page web app for
+testing and monitoring.
 
 > Note: the requirements file references a placeholder folder name
 > `xiao-mag-halo`; the actual repository is `xiao-mag-lora`. This is the

@@ -3,15 +3,19 @@
 ## Firmware (on-node)
 
 - **MCU:** ESP32-S3 (Wio-S3 Wireless LoRa, XIAO form factor)
-- **Toolchain (decided):** PlatformIO — Meshtastic's official build
-  path. ESP-IDF only if lower-level work becomes necessary.
-- **Base firmware:** Meshtastic (provides LoRa mesh, telemetry, web client,
-  position handling). Fork/customize for:
-  - L76K GNSS integration (position fix → mesh position broadcasts)
-  - Power management: deep-sleep schedule synced to solar charge state
-  - (VERIFY) exact pin map for GNSS + battery sense on this board
-- **Radio config:** US915, default 915.9 MHz (Meshtastic US default),
-  LoRa SF7–SF12, long/medium/fast regional presets as needed.
+- **Toolchain (decided):** PlatformIO, native custom firmware (P2P — no
+  Meshtastic/LoRaWAN base). ESP-IDF only if lower-level work becomes
+  necessary.
+- **Firmware: custom point-to-point LoRa data link.** Drives the onboard
+  SX1262-class radio in direct mode (no LoRaWAN MAC). Features:
+  - Role flag: sensor/transmitter (GNSS + telemetry) vs receiver/host-side
+  - Custom framed datagrams (magic, seq, type, CRC) + keepalive, optional
+    ACK/retry
+  - L76K GNSS: position fix embedded in telemetry payload
+  - Deep-sleep duty cycle synced to solar charge state
+  - (VERIFY) exact pin map for LoRa SPI, GNSS UART, battery sense
+- **Radio config:** US915, 2–4 provisioned channels per site (915.9–916.5
+  MHz), SF7–SF12 selectable per link class. No LoRaWAN, no mesh.
 
 ## Client-side (Linux host)
 
@@ -34,7 +38,8 @@
   - Node status board: online/offline, battery %, last fix, position map
   - Live log/telemetry stream (WebSocket)
   - Node control: transmit test message, sleep, config change
-  - Mesh topology / last-hop view
+  - Link health view: RX count, SNR/SF, packet loss, last RX time (P2P)
+    — no mesh topology
 - Stack: to be selected with the toolkit decision (plain TS + Vite or
   equivalent; no server-side framework required).
 
