@@ -70,9 +70,22 @@ the crc field** (bytes 0–5 and 8–25).
   Verify on the bench it locks and disciplines the clock.
 - **Sensor:** `read_sample()` is a placeholder (dummy sample) — wire the real
   RM3100 + MCP9808 I2C reads once the radio link is proven.
-- **Client forwarding:** the RX path logs frames to `Serial` (USB CDC) and forwards
-  raw frame bytes; the host decodes 26 B → JSON. Wi-Fi/BLE config mode is a later
-  step (off in normal op for power).
+- **Client forwarding (DONE):** the RX path forwards each CRC-valid frame's raw 26
+  bytes to `Serial` (USB CDC). The host decoder [`src/host/decode.py`](../host/decode.py)
+  resyncs on the `0xA5 0x5A` magic, CRC-checks, and emits one JSON object per frame.
+  See [`docs/poc_walkthrough.md`](../../docs/poc_walkthrough.md) to flash + run the 2-node
+  link test. Wi-Fi/BLE config mode is a later step (off in normal op for power).
+
+## Host-side decoder (26 B → JSON)
+The node forwards raw 26-byte frames over USB. `src/host/decode.py` turns them into
+JSON (resyncs on `0xA5 0x5A`, re-validates the CCITT-FALSE CRC, one JSON object per
+line; `-v` echoes the node's ASCII heartbeat lines to stderr):
+
+```sh
+python3 src/host/decode.py --selftest            # prove it (byte-level, no hardware)
+python3 src/host/decode.py -p /dev/ttyACM1 -v    # live USB-serial (needs pyserial)
+python3 src/host/decode.py -f capture.bin         # from a saved capture, or via stdin
+```
 
 ## Radio configuration (US915, §15.247 — Q9 closed)
 Set in `src/radio_sx1262.cpp` (`Sx1262Radio::begin()`): LoRa, **915.9 MHz**

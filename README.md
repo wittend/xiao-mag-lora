@@ -40,7 +40,12 @@ testing and monitoring.
 - [x] Wire format — binary, 3-decimal fixed-point (26 B frame)
 - [x] Regulatory basis — US915 LoRa verified under §15.247, **no TX duty cycle** (Q9 closed; evidence in `assets/fcc/`)
 - [x] Firmware scaffold — PlatformIO project; 26 B frame codec + sample store + link + NMEA parser **host-tested** (byte-exact vs the worked example)
-- [~] Firmware device build — **compiles green** for ESP32-S3 (`pio run -e wio_s3_lora`, stand-in board pending Q3); flash + bench blocked on Q3/Q4/Q5 datasheets + hardware
+- [x] Firmware device build — **compiles green with the real SX1262 driver active** (`pio run -e wio_s3_lora`, RadioLib 7.x; stand-in board `seeed_xiao_esp32s3`)
+- [x] Real SX1262 driver — slotted behind the `Radio` interface (`src/firmware/src/radio_sx1262.cpp`), US915 / SF9 / 125 kHz / 17 dBm, enabled by default
+- [x] Host-side 26 B → JSON decoder — `src/host/decode.py` (byte-exact self-test vs the worked example)
+- [x] PoC bench/flash walkthrough — `docs/poc_walkthrough.md` (2-node link test + control-pin gate)
+- [~] Q3/Q4 resolved from `assets/` datasheets — Wio-S3 = ESP32-S3R8 + SX1262 (US915); L76K = UART @ 9600 (D6/D7). Q5 (P1-Pro power wiring) still open (teardown)
+- [~] Flash + 2-node bench — blocked only on the 4 SX1262 control pins (CS/DIO1/BUSY/RST); SPI confirmed
 - [ ] Client control software
 - [ ] SPA web app
 - [ ] Integration / deployment
