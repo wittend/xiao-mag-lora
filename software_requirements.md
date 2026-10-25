@@ -12,19 +12,19 @@
   - Custom framed datagrams: fixed 8 B header (magic, seq, type, CCITT-CRC
     field) + the telemetry record (`ts`, `rt`, `x`, `y`, `z`) as **compact
     binary, 3-decimal fixed-point — 26 B frame** (decided; spec in
-    `docs/payload_format.md`). **1 packet/sec per direction inside
-    duty-limited acquisition windows** (FCC 1 % TX duty); best-effort with
-    sequence-gap detection, optional single ACK for config frames only (no
-    line-rate retry)
+    `docs/payload_format.md`). The node **samples 1/s into local storage**; the
+    radio delivers accumulated records **in bursts bounded by the FCC TX duty
+    limit (open Q9)** — reliable *ultimate* delivery via sequence numbers +
+    receiver ACK / gap retransmit (no line-rate retry)
   - L76K GNSS: **clock maintenance only** (disciplines the remote clock so
     `ts` and the 1 pkt/s cadence stay aligned); no position is transmitted
   - Deep-sleep duty cycle synced to solar charge state
   - (VERIFY) exact pin map for LoRa SPI, GNSS UART, battery sense
 - **Radio config:** US915, 2–4 provisioned channels per site (915.9–916.5
-  MHz), **SF9 default (213 ms); SF10 (401 ms) for long links; SF7–SF8
-  short/bench**; SF11+ excluded (exceeds the 1 s slot). 1 pkt/s is
-  non-compliant continuously under FCC 1 % TX duty — runs inside
-  acquisition windows (length: open question Q9). No LoRaWAN, no mesh.
+  MHz). Distance target ≤1 km LoS, so use the **fastest SF that links — SF7
+  (59 ms), or SF6/250 kHz (16 ms), as default**; SF8–SF9 only if a specific
+  site needs extra range. Fastest-SF choice maximizes flush rate under the FCC
+  TX duty limit (open Q9). No LoRaWAN, no mesh.
 
 ## Client-side (Linux host)
 

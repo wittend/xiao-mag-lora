@@ -41,34 +41,47 @@ The application is designed against **144 useful bits/sec**.
 
 ## C. FCC Part 15 duty cycle (902–928 MHz)
 
-Limit: **1 % TX duty = 0.6 s airtime per minute** (47 CFR §15.247(d)(4)(iii) —
-applies to *frequency-hopping and spread-spectrum* transmitters; LoRa CSS is
-spread spectrum, so it binds. Also 1 W conducted / 30 dBm EIRP — well above
-our ~20 dBm TX).
+Limit (UNVERIFIED — confirm against CFR §15.247(d)(4)): 47 CFR Part 15 caps
+*average* TX duty for spread-spectrum transmitters in 902–928 MHz. My working
+figure is **1 % = 0.6 s airtime per minute**; if the real limit is higher (e.g.
+10 %), everything below scales up linearly. (Also 1 W conducted / 30 dBm EIRP,
+far above our ~20 dBm TX — power is not the constraint.)
 
-Sustainable cadence, 26 B frame:
+The duty limit does not bound the 1/s *sampling* rate; it bounds the **flush
+rate** — how fast the node can deliver accumulated records:
 
-| SF | airtime | max compliant | 1 pkt/s window per minute |
-|----|---------|---------------|---------------------------|
-| SF7 | 59 ms | 10.1 pkts/min | ~1 s |
-| SF8 | 111 ms | 5.4 pkts/min | ~1 s |
-| SF9 | 213 ms | 2.8 pkts/min | **~2.8 s** |
-| SF10 | 401 ms | 1.5 pkts/min | ~1.5 s |
+    flush_rate (samples/s) = duty_limit / airtime_per_sample
 
-⇒ **Continuous/sustained 1 pkt/s is non-compliant at every SF** (minimum
-airtime alone is 5.9 % duty — a hard floor). 1 pkt/s operates only inside
-duty-limited acquisition windows (length = open question Q10).
+One 26 B frame = one 18 B sample. Airtime, and the resulting flush rate at two
+candidate duty limits:
 
-**Sustained-1-pkt/s alternatives (same Wio-S3 board, per strategy §3a):**
+| SF/BW    | airtime/sample | flush @1 % | flush @10 % |
+|----------|----------------|------------|-------------|
+| SF6/250k | 16 ms          | 0.62/s     | 6.2/s       |
+| SF7/250k | 30 ms          | 0.34/s     | 3.4/s       |
+| SF7/125k | 59 ms          | 0.17/s     | 1.7/s       |
+| SF8/125k | 111 ms         | 0.09/s     | 0.9/s       |
+| SF9/125k | 213 ms         | 0.05/s     | 0.5/s       |
 
-| Option | basis | 26 B packet airtime | duty limit | range vs SF9 |
-|--------|-------|--------------------|------------|--------------|
-| GFSK 9.6 kbps, 902–928 MHz | §15.247(c), 50 mW TPO | ≈ 30 ms | **none** (not spread spectrum) | ~10–30× less |
+Batching N records/frame amortizes the 8 B header (SF7/125k @1 %: 8-per-frame
+→ 0.39/s, ~2.3× better than 1-per-frame).
+
+**Steady state (bounded lag) needs flush_rate ≥ 1.0** — reachable at ~10 % duty
+(SF7/250k → 3.4×) but not at a strict 1 % (max 0.62/s at SF6/250k). At 1 %,
+24/7 sampling cannot be flushed in real time by any LoRa SF: the node still
+delivers everything *eventually* in bursts, but lag grows (1 h of data takes
+~3 h to drain at SF7/250k). *(Correction: an earlier draft of this appendix used
+6 s/min for 1 % — a 10× slip; 0.6 s/min is correct.)*
+
+If 1 % is real **and** the client requires bounded (near-real-time) lag, the
+same Wio-S3 board has two duty-unconstrained fallbacks:
+
+| Option | basis | 26 B airtime | duty limit | range vs SF7 |
+|--------|-------|--------------|------------|--------------|
+| GFSK 9.6 kbps, 902–928 MHz | §15.247(c), 50 mW TPO | ≈ 30 ms | **none** (not spread spectrum) | fine at ≤1 km |
 | WiFi 2.4 GHz | §15.407 | negligible | none (PSD-limited) | needs base/infra |
 
-GFSK sensitivity ≈ −115 dBm vs −147 dBm (SF9) → ~32 dB of lost link margin
-≈ 10–30× range. If the client needs sustained 1 pkt/s *and* km-scale range,
-no Wio-S3 path satisfies both.
+At the stated ≤1 km LoS target, GFSK range is sufficient.
 
 
 ## D. Link budget estimate (FSPL, 915 MHz)
@@ -92,8 +105,9 @@ SF10 −151, SF11 −155, SF12 −158 dBm.
 | 50 km | 125.7 dB | −103.7 dBm | 43 dB | 47 dB |
 
 Free-space math shows large margins at km scale; real-world limits will be
-terrain/obstruction/shadowing, not FSPL. Site survey (step 6) replaces this
-table. SF9 default leaves ≥ 57 dB margin to 10 km in clear sight.
+terrain/obstruction/shadowing, not FSPL. At the stated ≤1 km LoS target even
+SF7 (least margin) keeps ~67 dB, so range is not the constraint — the fastest
+SF that links is the right default (§3a).
 
 ## E. Power & autonomy estimate
 
@@ -136,8 +150,7 @@ Residual assumptions (flagged in `payload_format.md`): `rt` unsigned
 
 | Change | Effect |
 |--------|--------|
-| Q9 (sustained vs windowed) | if sustained → physical-layer change (§3a: GFSK/WiFi), not LoRa SF |
-| Q10 window length (if windowed) | updates E (autonomy) and C (compliance envelope) |
+| Q9 (FCC duty limit) | sets the flush-rate ceiling; steady state needs duty/airtime ≥ 1/s |
 | `rt` needs negatives / > 65.535 | frame → 30 B; SF10 airtime → ~460 ms (still fits 1 s) |
 | BW raised to 250 kHz | airtimes halve → more 1-pkt/s time per minute, less range |
 | Measured Wio-S3/P1-Pro currents | replaces E's assumptions with data |

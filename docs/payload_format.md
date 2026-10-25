@@ -47,15 +47,16 @@ A5 5A 01 00 01 00 F6 4C | 10 2E FE 68 | 55 5A | 4E 61 BC 00 | FC 6B FC FF | 79 0
 
 ## Airtime (125 kHz, 8-symbol preamble, CRC on)
 
-| SF  | frame | airtime | fits 1 s slot |
+| SF  | frame | airtime | note        |
 |-----|-------|---------|---------------|
-| SF7 | 26 B  | 59 ms   | yes |
+| SF7 | 26 B  | 59 ms   | default     |
 | SF8 | 26 B  | 111 ms  | yes |
-| SF9 | 26 B  | 213 ms  | yes (default) |
+| SF9 | 26 B  | 213 ms  | range-only  |
 | SF10| 26 B  | 401 ms  | yes (long range) |
 
-SF9 is the default; SF10 for long links; SF7–SF8 for short/bench links.
-SF11+ excluded (exceeds the 1 s slot).
+SF7 (or SF6/250 kHz) is the default — the fastest SF that links at the ≤1 km
+LoS target; SF8–SF9 only if a site needs the range. Faster SF maximizes flush
+rate under the FCC TX duty limit (strategy §3a).
 
 ## Assumptions to confirm (fold into acceptance test)
 

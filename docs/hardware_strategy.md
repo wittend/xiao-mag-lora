@@ -44,13 +44,15 @@ PlatformIO application:
   (e.g., 915.9 / 916.1 / 916.3 / 916.5 MHz) so multiple P2P links in the same
   area don't collide; no dynamic frequency planning (that's LoRaWAN's job).
   Channels provisioned at deploy via WiFi/BT.
-- **Data rates (constrained by the 1 pkt/s budget — see §3):** SF9 default
-  (213 ms for the 26 B binary frame — fits a 1 s slot with ~787 ms spare);
-  SF10 (401 ms) for long links; SF7–SF8 for short/bench. SF11+ is **excluded**:
-  airtime exceeds one 1 s slot.
-- **Duty cycle:** FCC Part 15 (902–928 MHz) caps TX at **1 %** — continuous
-  1 pkt/s is *not* compliant at any SF. 1 pkt/s runs only inside
-  duty-limited acquisition windows (§3 item 3).
+- **Data rates (constrained by the flush-rate budget — see §3):** use the
+  **fastest SF that still links at ≤1 km LoS** — SF7 (59 ms), or SF6/250 kHz
+  (16 ms), as default; SF8–SF9 only if a specific site needs the range. Faster
+  SF = more flush throughput per unit of TX duty. SF11+ **excluded** (slowest,
+  worst flush rate, never needed at this range).
+- **Duty cycle:** FCC Part 15 (902–928 MHz) caps **average** TX duty (exact
+  limit = open Q9, unverified). This bounds the radio's **flush rate**, not the
+  1/s sampling rate. Delivery is bursty (windowed); sustained on-air 1/s is
+  neither required nor achievable (§3a).
 - **Provisioning flow:** WiFi/BT + FPC antenna at deploy for role, channel,
   keys, and schedule; node then runs on LoRa P2P + solar + GNSS.
 
@@ -74,41 +76,60 @@ Typical packet (client example):
    |-------------|----------|----------|----------|-----------|
    | 88 B JSON   | 132 ms   | 238 ms   | 438 ms   | 811 ms ✗  |
    | 26 B binary | 59 ms    | 111 ms   | 213 ms   | 401 ms    |
-3. **Regulatory ceiling — the hard constraint.** FCC Part 15 (902–928 MHz)
-   allows ≤ 1 % TX duty = 0.6 s airtime per minute. Minimum possible
-   airtime per packet is ~59 ms (26 B @ SF7) → **continuous 1 pkt/s is
-   non-compliant at every spreading factor** (5.9–44 % duty). With the 26 B
-   frame: SF9 (213 ms) allows **≤ ~2 s of 1 pkt/s per minute**; SF10 (401 ms)
-   ~1.5 s per minute. ⇒ The 1 pkt/s rate is achievable only in duty-limited
-   **acquisition windows**; nominal window length is open question Q9 and
-   drives autonomy, ingest buffering, and compliance.
+3. **Regulatory ceiling.** FCC Part 15 (902–928 MHz) caps **average TX duty**;
+   the exact limit for a fixed-to-fixed spread-spectrum link is the single
+   decisive unknown (§3a; my earlier “1 %” was unverified). It bounds the
+   **flush rate** (duty ÷ airtime-per-sample), not the 1/s sampling rate.
+   Sustained on-air 1/s is unachievable at any SF; **bursty (windowed)
+   delivery is the operating mode** and is compliant by construction (average
+   duty ≤ limit). See `docs/calculations.md` §C.
 4. **No retransmission storms.** Lost packets are not auto-retried at line
-   rate (retries would blow both the 1 s slot and the duty budget); the link
+   rate (retries would blow the TX duty budget); the link
    layer uses sequence numbers + best-effort, with optional single ACK for
    critical/config frames only. Application-level cadence absorbs loss.
 
    *All derivations and estimates: `docs/calculations.md` (appendix).*
 
-### 3a. Pivotal decision — sustained vs windowed 1 pkt/s
+### 3a. Operating model — sampling cadence vs delivery (corrected)
 
-Sustained 1 pkt/s is **unachievable on US915 LoRa at any SF** (minimum
-possible duty 5.9 % vs 1 % limit — a hard floor, not tunable). The protocol
-survives **only if** 1 pkt/s is required *during acquisition windows* (SF9:
-28 pkts/min, ~2.8 s of 1-pkt-s per minute). If the client requires
-**sustained 24/7** 1 pkt/s, the physical layer must change — the 1 % duty
-binds *spread-spectrum* transmitters only, and the same Wio-S3 board covers
-both alternatives:
+The 1/s figure is a **sampling** cadence, not a required **on-air** rate. The
+node samples 1 record/s into local non-volatile storage (GNSS-clocked `ts`);
+the radio delivers the accumulated records to the single peer **in bursts**,
+delay-tolerant, with **reliable ultimate delivery** of every sample. Distance
+target is ≤ ~1 km unobstructed LoS (less is fine).
 
-- **GFSK/FSK narrowband, 902–928 MHz** (SX1262 does GFSK natively): falls
-  under §15.247(c), 50 mW TPO, **no duty-cycle limit**. 26 B @ 9.6 kbps ≈
-  30 ms airtime → continuous 1 pkt/s compliant. Cost: ~10–30× less range
-  than SF9 (no processing gain; ≈ −115 dBm vs −147 dBm).
-- **2.4 GHz WiFi** (on-board): no duty-cycle limit, but an infrastructure
-  link (needs a base/coverage), not a direct P2P radio path.
+This decouples the radio from the 1/s rate. The only real constraint is the
+**average on-air duty** (FCC) vs the **flush rate** it permits:
 
-⇒ **Client question (decides the physical layer):** sustained or windowed?
-If sustained **and** km-scale range is required, no single Wio-S3 path
-satisfies both and the project should stop. See `docs/calculations.md` §C.
+    flush_rate (samples/s) = duty_limit / airtime_per_sample
+
+Steady state (lag stays bounded) needs flush_rate ≥ 1.0. If not, the node can
+still deliver everything eventually (bursty, delay-tolerant) — the backlog just
+drains slower than it fills, so lag grows; acceptable only if the client
+tolerates that.
+
+| SF/BW    | airtime/sample | flush @1%  | flush @10% |
+|----------|----------------|------------|------------|
+| SF6/250k | 16 ms          | 0.62/s     | 6.2/s      |
+| SF7/250k | 30 ms          | 0.34/s     | 3.4/s      |
+| SF7/125k | 59 ms          | 0.17/s     | 1.7/s      |
+| SF8/125k | 111 ms         | 0.09/s     | 0.9/s      |
+| SF9/125k | 213 ms         | 0.05/s     | 0.5/s      |
+
+Batching (N records/frame) amortizes the 8 B header: at SF7/125k/1 %, 8-per-
+frame raises flush to 0.39/s (~2.3×).
+
+**Range is not the constraint** (≤1 km LoS; SF7 has ~67 dB margin there), so we
+use the *fastest* SF that still links — SF7/SF6 — not SF9.
+
+⇒ **Decisive unknown: the actual FCC TX duty limit** for a fixed-to-fixed
+902–928 MHz spread-spectrum link. *(My earlier “1 %” was from memory and I
+could not verify the CFR text in this session.)* At ~10 % the node reaches
+steady state with large margin (SF7/250k → 3.4× accumulation). At a strict 1 %,
+24/7 sampling cannot be flushed in real time by any LoRa SF — delivery must be
+bursty with growing lag, or sampling is decimated. If 1 % is real **and** lag
+must be bounded, the same board falls back to 902–928 MHz GFSK (no duty limit,
+~10–30× less range) or 2.4 GHz WiFi.
 
 
 ## 4. Power Subsystem (decided 2026-10-24)
@@ -119,10 +140,10 @@ satisfies both and the project should stop. See `docs/calculations.md` §C.
   data link (P2P only); the P1-Pro serves purely as the solar/LiFePO4 power
   subsystem.
 - **Solar panel:** 16–20 W class, ~18 V peak (Vmp/Voc to be confirmed from the
-  selected panel's datasheet). Sized for **≥ 2–3 days sunless autonomy** at
-  expected duty cycle: 1 pkt/s inside duty-limited acquisition windows (open
-  Q9) + GNSS clock-hold + deep sleep between windows.
-  - Autonomy math to be added once Q9 (acquisition-window length) is fixed.
+  selected panel's datasheet). Sized for **≥ 2–3 days sunless autonomy**. The
+  node samples 1/s continuously (cheap, on-chip); the radio flushes accumulated
+  records in bursts bounded by the TX duty limit (open Q9). Dominant draws:
+  flush TX + GNSS clock-hold + deep sleep between flushes.
 
 ## 5. Mechanical
 
@@ -148,13 +169,13 @@ satisfies both and the project should stop. See `docs/calculations.md` §C.
 8. ~~Binary field scales~~ — **decided: 3-decimal fixed-point** (×1000).
    Residual to verify at acceptance: `rt` unsigned 0–65.535, x/y/z within
    int32×1000 range, second-resolution `ts`.
-9. **PIVOTAL (client) — sustained or windowed 1 pkt/s?** Sustained 24/7
-    is unachievable on US915 LoRa (§3a) and forces a physical-layer change
-    (GFSK narrowband or WiFi — same board). Windowed keeps the LoRa design.
-    This single answer decides the protocol; confirm before any bench work.
-10. **Acquisition-window length (if windowed, client):** how long must the
-    link sustain 1 pkt/s (seconds per window, windows per hour)? Drives
-    compliance, TX energy/autonomy math, and host ingest buffering.
+9. **DECISIVE — actual FCC TX duty limit** for a fixed-to-fixed 902–928 MHz
+    spread-spectrum link (verify CFR §15.247(d)(4); my “1 %” was unverified).
+    Bounds flush rate: steady state needs duty/airtime ≥ 1/s (§3a).
+10. **Client — delivery-lag tolerance:** must the delivered backlog be bounded
+    (near-real-time, i.e. flush ≥ accumulation — needs ~10 %+ duty at SF7), or
+    is delay-tolerant “eventually, reliably” acceptable (works at any duty, lag
+    grows when duty is low)?
 
 ## 7. Procurement Note
 
