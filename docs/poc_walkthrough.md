@@ -26,6 +26,31 @@ never see B's own TX on B's serial — only what B receives from A.
 
 ---
 
+## Fast path: the Makefile (no pyserial needed)
+
+The repo-root `Makefile` wraps the whole loop and includes a `stty`+`cat` capture
+path, so `pyserial` is **optional**. From the repo root:
+
+```sh
+make ports                              # which ports did the two Kits come up on?
+make build
+make flashA PORTA=/dev/ttyACM0
+make flashB PORTB=/dev/ttyACM1
+make linktest PORTB=/dev/ttyACM1        # LIVE: capture B's serial -> JSON, 30 s
+make cap    PORTB=/dev/ttyACM1          # or save raw bytes: capture.bin
+make decode FILE=capture.bin            # ...then decode the file
+make selftest                           # decoder self-test + host unit test
+```
+
+`make linktest` streams node B's serial through the decoder in real time (JSON
+appears as frames arrive; Ctrl-C stops early). The equivalent one-liner (no
+Makefile):
+
+```sh
+stty -F /dev/ttyACM1 115200 raw -echo -crtscts min 0 time 1
+timeout 30 cat /dev/ttyACM1 | python3 src/host/decode.py -v
+```
+
 ## 1) Build
 
 ```sh
