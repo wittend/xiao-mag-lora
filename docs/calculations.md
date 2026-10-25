@@ -39,49 +39,56 @@ T_packet  = N_symbol · T_symbol
 
 The application is designed against **144 useful bits/sec**.
 
-## C. FCC Part 15 duty cycle (902–928 MHz)
+## C. FCC Part 15 constraints (902–928 MHz) — verified against eCFR
 
-Limit (UNVERIFIED — confirm against CFR §15.247(d)(4)): 47 CFR Part 15 caps
-*average* TX duty for spread-spectrum transmitters in 902–928 MHz. My working
-figure is **1 % = 0.6 s airtime per minute**; if the real limit is higher (e.g.
-10 %), everything below scales up linearly. (Also 1 W conducted / 30 dBm EIRP,
-far above our ~20 dBm TX — power is not the constraint.)
+**There is no TX duty cycle.** I verified the actual text of 47 CFR Part 15
+(§§ 15.205, 15.207, 15.209, 15.247, 15.249) via the eCFR API (2026). The word
+"duty" does not appear in §15.247, and the provision I earlier cited as the
+source of a "1 % TX duty" — "§15.247(d)(4)(iii)" — **does not exist**. That
+figure was an error and is retracted. (The only "duty" in Part 15 is a buried-
+cable-marker exemption that disallows duty compensation — the opposite of a
+transmit cap.)
 
-The duty limit does not bound the 1/s *sampling* rate; it bounds the **flush
-rate** — how fast the node can deliver accumulated records:
+For a 902–928 MHz **digitally-modulated** transmitter (LoRa CSS is treated in
+this class), the real §15.247 constraints are:
 
-    flush_rate (samples/s) = duty_limit / airtime_per_sample
+| Provision | Rule | Our design (Wio-S3, ~+20 dBm, 125 kHz CSS) | Verdict |
+|-----------|------|--------------------------------------------|---------|
+| (b)(3) peak conducted power | 1 Watt | 0.1 W | ✅ 10 dB headroom |
+| (e) PSD, continuous TX | ≤ 8 dBm in any 3 kHz | ≈ +3.8 dBm/3 kHz @125 kHz; +0.8 @250 kHz | ✅ ~4 dB margin |
+| (d) out-of-band | ≥ 20 dB below in-band in any 100 kHz out | clean chirp | ✅ routine |
+| (b)(4)/(c) antenna gain | **no > 6 dBi point-to-point exemption** in 902–928 (exists only for 2.4/5.8 GHz) → back off (gain−6 dBi) dB | 2 dBi now; high-gain later = power tradeoff | ⚠️ note |
 
-One 26 B frame = one 18 B sample. Airtime, and the resulting flush rate at two
-candidate duty limits:
+PSD check: 20 dBm spread over a 125 kHz chirp → 20 − 10·log10(125 000) =
+−31 dBm/Hz; in a 3 kHz band that's −31 + 10·log10(3 000) = **+3.8 dBm**, under
+the 8 dBm limit (even lower at 250 kHz). So continuous TX at our power is fine.
 
-| SF/BW    | airtime/sample | flush @1 % | flush @10 % |
-|----------|----------------|------------|-------------|
-| SF6/250k | 16 ms          | 0.62/s     | 6.2/s       |
-| SF7/250k | 30 ms          | 0.34/s     | 3.4/s       |
-| SF7/125k | 59 ms          | 0.17/s     | 1.7/s       |
-| SF8/125k | 111 ms         | 0.09/s     | 0.9/s       |
-| SF9/125k | 213 ms         | 0.05/s     | 0.5/s       |
+**Consequence for the data path.** With no duty cycle, on-air throughput is
+bounded only by (1) 100 % on-air duty (physics) and (2) the PSD limit (met).
+Sustained on-air ceiling = 1 / airtime_per_packet:
 
-Batching N records/frame amortizes the 8 B header (SF7/125k @1 %: 8-per-frame
-→ 0.39/s, ~2.3× better than 1-per-frame).
+| SF/BW   | airtime | sustained-on-air ceiling |
+|---------|---------|--------------------------|
+| SF7/125k | 59 ms | ~16.9 pkts/s |
+| SF8/125k | 111 ms | ~9.0 pkts/s |
+| SF9/125k | 213 ms | ~4.7 pkts/s |
+| SF10/125k | 401 ms | ~2.5 pkts/s |
+| SF11/125k | 801 ms | ~1.25 pkts/s |
 
-**Steady state (bounded lag) needs flush_rate ≥ 1.0** — reachable at ~10 % duty
-(SF7/250k → 3.4×) but not at a strict 1 % (max 0.62/s at SF6/250k). At 1 %,
-24/7 sampling cannot be flushed in real time by any LoRa SF: the node still
-delivers everything *eventually* in bursts, but lag grows (1 h of data takes
-~3 h to drain at SF7/250k). *(Correction: an earlier draft of this appendix used
-6 s/min for 1 % — a 10× slip; 0.6 s/min is correct.)*
+Sustained 1 packet/s is comfortably feasible at SF7–SF10 (only SF11 is near
+the wire). The delay-tolerant "sample-locally, flush-in-bursts" model is even
+more comfortable; batching N records/frame shortens total airtime further.
 
-If 1 % is real **and** the client requires bounded (near-real-time) lag, the
-same Wio-S3 board has two duty-unconstrained fallbacks:
+**Open item (not a blocker) — confirm, don't assume:** §15.247(a)(2) requires
+digital-modulation systems in 902–928 to have a **minimum 6 dB bandwidth of
+500 kHz**. How CSS LoRa at 125 kHz satisfies that clause is established by the
+Wio-S3's FCC grant / the LoRa Alliance US915-928 spec, not the raw text. If the
+500 kHz floor binds, we run 500 kHz BW — a standard US915 setting that
+shortens airtimes and widens PSD margin (a non-downside). → Q9.
 
-| Option | basis | 26 B airtime | duty limit | range vs SF7 |
-|--------|-------|--------------|------------|--------------|
-| GFSK 9.6 kbps, 902–928 MHz | §15.247(c), 50 mW TPO | ≈ 30 ms | **none** (not spread spectrum) | fine at ≤1 km |
-| WiFi 2.4 GHz | §15.407 | negligible | none (PSD-limited) | needs base/infra |
-
-At the stated ≤1 km LoS target, GFSK range is sufficient.
+**Alternatives if we ever outgrow LoRa's airtime** (not needed for 1/s): the
+same SX1262 supports GFSK/FSK (narrowband, higher bps), and the Wio-S3 ESP32-
+S3 supports WiFi (2.4 GHz, §15.407).
 
 
 ## D. Link budget estimate (FSPL, 915 MHz)
@@ -150,7 +157,7 @@ Residual assumptions (flagged in `payload_format.md`): `rt` unsigned
 
 | Change | Effect |
 |--------|--------|
-| Q9 (FCC duty limit) | sets the flush-rate ceiling; steady state needs duty/airtime ≥ 1/s |
+| Q9 (CSS LoRa US915 class / 500 kHz BW) | confirms the PSD/bandwidth path; if 500 kHz binds, airtimes halve (favorable) |
 | `rt` needs negatives / > 65.535 | frame → 30 B; SF10 airtime → ~460 ms (still fits 1 s) |
-| BW raised to 250 kHz | airtimes halve → more 1-pkt/s time per minute, less range |
+| BW raised to 250 kHz | airtimes halve → higher on-air ceiling, less range, wider PSD margin |
 | Measured Wio-S3/P1-Pro currents | replaces E's assumptions with data |

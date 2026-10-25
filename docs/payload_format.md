@@ -49,14 +49,15 @@ A5 5A 01 00 01 00 F6 4C | 10 2E FE 68 | 55 5A | 4E 61 BC 00 | FC 6B FC FF | 79 0
 
 | SF  | frame | airtime | note        |
 |-----|-------|---------|---------------|
-| SF7 | 26 B  | 59 ms   | default     |
+| SF7 | 26 B  | 59 ms   | fast flush  |
 | SF8 | 26 B  | 111 ms  | yes |
-| SF9 | 26 B  | 213 ms  | range-only  |
+| SF9 | 26 B  | 213 ms  | default     |
 | SF10| 26 B  | 401 ms  | yes (long range) |
 
-SF7 (or SF6/250 kHz) is the default — the fastest SF that links at the ≤1 km
-LoS target; SF8–SF9 only if a site needs the range. Faster SF maximizes flush
-rate under the FCC TX duty limit (strategy §3a).
+SF9 (213 ms) is the default — robust at the ≤1 km LoS target with 4.7× on-air
+headroom over the 1/s rate. SF7 (59 ms) gives faster backlog flush; SF8/SF10 for
+per-site tuning. SF is chosen by link budget at the required on-air rate — there
+is no FCC TX duty cycle to optimize against (§C, strategy §3a).
 
 ## Assumptions to confirm (fold into acceptance test)
 
