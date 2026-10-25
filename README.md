@@ -38,7 +38,9 @@ testing and monitoring.
 - [x] Bill of Materials draft
 - [x] Toolkit selection — PlatformIO (confirmed)
 - [x] Wire format — binary, 3-decimal fixed-point (26 B frame)
-- [ ] Firmware build & test
+- [x] Regulatory basis — US915 LoRa verified under §15.247, **no TX duty cycle** (Q9 closed; evidence in `assets/fcc/`)
+- [x] Firmware scaffold — PlatformIO project; 26 B frame codec + sample store + link + NMEA parser **host-tested** (byte-exact vs the worked example)
+- [ ] Firmware device build & flash (blocked on Q3/Q4/Q5 datasheets + hardware)
 - [ ] Client control software
 - [ ] SPA web app
 - [ ] Integration / deployment

@@ -12,7 +12,7 @@ representation (decoder output, SPA, logs).*
 | 2      | 2    | seq   | uint16 sequence, wraps at 65535; gaps = lost packets |
 | 4      | 1    | type  | `0x01` data · `0x02` ack · `0x03` keepalive · `0x04` config |
 | 5      | 1    | rsvd  | reserved, transmit `0x00` |
-| 6      | 2    | crc   | CCITT-FALSE (0xFFFF init) over bytes 0–15 (header minus crc + payload) |
+| 6      | 2    | crc   | CCITT-FALSE (0xFFFF init) over the whole frame **except the crc field** — i.e. bytes 0–5 and 8–25 |
 | 8      | 4    | ts    | uint32, Unix epoch seconds (UTC) |
 | 12     | 2    | rt    | uint16, value × 1000 → range **0 – 65.535**, 3-decimal |
 | 14     | 4    | x     | int32, value × 1000 → range **±21,474,836.47**, 3-decimal |
