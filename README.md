@@ -40,7 +40,7 @@ testing and monitoring.
 - [x] Wire format — binary, 3-decimal fixed-point (26 B frame)
 - [x] Regulatory basis — US915 LoRa verified under §15.247, **no TX duty cycle** (Q9 closed; evidence in `assets/fcc/`)
 - [x] Firmware scaffold — PlatformIO project; 26 B frame codec + sample store + link + NMEA parser **host-tested** (byte-exact vs the worked example)
-- [ ] Firmware device build & flash (blocked on Q3/Q4/Q5 datasheets + hardware)
+- [~] Firmware device build — **compiles green** for ESP32-S3 (`pio run -e wio_s3_lora`, stand-in board pending Q3); flash + bench blocked on Q3/Q4/Q5 datasheets + hardware
 - [ ] Client control software
 - [ ] SPA web app
 - [ ] Integration / deployment

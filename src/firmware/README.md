@@ -40,9 +40,13 @@ and the `$GPRMC`→epoch path all behave.
 ```sh
 cd src/firmware
 pio run   -e native         # host build of the portable modules (sanity/type check)
-pio run   -e wio_s3_lora    # device build (ESP32-S3)
+pio run   -e wio_s3_lora    # device build (ESP32-S3) — verified green (stand-in board, see below)
 pio device monitor -e wio_s3_lora
 ```
+> `board =` is a **stand-in** (`seeed_xiao_esp32s3`, the same ESP32-S3 MCU)
+> because stock PlatformIO has no `Wio-S3-LoRa` board def — see open question
+> **Q3**. RadioLib is disabled in `lib_deps` (firmware uses StubRadio); enable it
+> when the real SX1262 driver lands.
 
 ## Frame wire format
 Source of truth: [`docs/payload_format.md`](../../docs/payload_format.md).
