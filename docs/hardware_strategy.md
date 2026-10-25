@@ -152,9 +152,11 @@ fallbacks only if we ever outgrow LoRa’s airtime — not a duty escape.
 8. ~~Binary field scales~~ — **decided: 3-decimal fixed-point** (×1000).
    Residual to verify at acceptance: `rt` unsigned 0–65.535, x/y/z within
    int32×1000 range, second-resolution `ts`.
-9. **Compliance — CSS LoRa US915 class / bandwidth:** confirm how Chirp Spread
-    Spectrum at 125 kHz maps to §15.247(a)(2)’s 500 kHz 6-dB-bandwidth minimum
-    (resolve via the Wio-S3 FCC grant / LoRa Alliance US915-928 spec; §C).
+9. ~~Compliance — CSS LoRa US915 (Q9)~~ — **CLOSED (verified 2026-10-24):** an
+    SX1262-class US915 LoRa module (RAK3172 / RAK7258) is granted under
+    **§15.247 (Part 15 Subpart C)** at 923.3–927.5 MHz, and its §15.247 test
+    report passes (a)(2) 6 dB bandwidth, (b)(3) power, (d) band-edge/OOB, and
+    (e) PSD — measured at **100 % duty** (no duty cycle). Evidence: `assets/fcc/`.
 10. **Client — delivery-lag tolerance (now low-risk):** with no duty cycle,
     bounded/near-real-time lag is achievable at any SF ≤ 10, so either reading
     (real-time or delay-tolerant) is satisfiable. Confirm which, to set the

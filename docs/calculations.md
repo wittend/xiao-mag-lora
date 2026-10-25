@@ -79,12 +79,14 @@ Sustained 1 packet/s is comfortably feasible at SF7–SF10 (only SF11 is near
 the wire). The delay-tolerant "sample-locally, flush-in-bursts" model is even
 more comfortable; batching N records/frame shortens total airtime further.
 
-**Open item (not a blocker) — confirm, don't assume:** §15.247(a)(2) requires
-digital-modulation systems in 902–928 to have a **minimum 6 dB bandwidth of
-500 kHz**. How CSS LoRa at 125 kHz satisfies that clause is established by the
-Wio-S3's FCC grant / the LoRa Alliance US915-928 spec, not the raw text. If the
-500 kHz floor binds, we run 500 kHz BW — a standard US915 setting that
-shortens airtimes and widens PSD margin (a non-downside). → Q9.
+**Q9 (CSS LoRa vs §15.247(a)(2)) — CLOSED.** §15.247(a)(2) sets a minimum 6 dB
+emission bandwidth of 500 kHz for digitally-modulated systems. Verified against a
+real grant: the RAK7258 / RAK3172 (SX1262-class, US915, chirp spread-spectrum,
+923.3–927.5 MHz) is authorized under **Part 15 Subpart C (§15.247)** and its §15.247
+test report marks §15.247(a)(2) 6 dB Emission Bandwidth — and (b)(3), (d), (e) — all
+**Compliant**, measured at **100 % duty**. So CSS LoRa is an authorized §15.247
+configuration; no duty cycle applies. Evidence: `assets/fcc/` (FCC grant
+2AF6B-RAK7258 + §15.247 LoRa test report; see `assets/fcc/README.md`).
 
 **Alternatives if we ever outgrow LoRa's airtime** (not needed for 1/s): the
 same SX1262 supports GFSK/FSK (narrowband, higher bps), and the Wio-S3 ESP32-
