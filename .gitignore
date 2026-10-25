@@ -27,3 +27,6 @@ kicad/*.kicad_prl
 *.key
 *.pem
 .env
+
+# Local session state (personal, auto-loaded pi context file — not shared)
+AGENTS.md
