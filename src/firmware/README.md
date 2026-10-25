@@ -17,6 +17,7 @@ in bursts. Point-to-point only; see `docs/hardware_strategy.md` and
 | `include/gnss_nmea.hpp`, `src/gnss_nmea.cpp` | Parse a `$GPRMC` sentence (checksum-verified) into a UTC epoch — clock discipline only. |
 | `include/radio.hpp` | Hardware-agnostic `Radio` interface (begin / SF / freq / send / poll). |
 | `include/radio_stub.hpp`, `src/radio_stub.cpp` | In-memory `Radio` for host tests + placeholder until the real driver lands. |
+| `include/radio_sx1262.hpp`, `src/radio_sx1262.cpp` | **Real SX1262 `Radio` driver** (RadioLib 7.x): US915 LoRa TX (blocking) + continuous interrupt-driven RX. Device-only. |
 | `src/main.cpp` | Device entry (`setup()`/`loop()`): sample → store → flush → RX → client; GNSS clock. Built for ESP32-S3 only. |
 | `test/host_test.cpp`, `test/run_host_test.sh` | Host-side unit tests (no PlatformIO required). |
 
@@ -45,8 +46,10 @@ pio device monitor -e wio_s3_lora
 ```
 > `board =` is a **stand-in** (`seeed_xiao_esp32s3`, the same ESP32-S3 MCU)
 > because stock PlatformIO has no `Wio-S3-LoRa` board def — see open question
-> **Q3**. RadioLib is disabled in `lib_deps` (firmware uses StubRadio); enable it
-> when the real SX1262 driver lands.
+> **Q3**. The **real SX1262 driver (RadioLib 7.x) is enabled by default**
+> (`-DXLORA_USE_SX1262`), so the built firmware is a working P2P PoC node. To
+> build without the radio (pure toolchain sanity) comment that flag out in
+> `platformio.ini`.
 
 ## Frame wire format
 Source of truth: [`docs/payload_format.md`](../../docs/payload_format.md).
@@ -54,22 +57,28 @@ Source of truth: [`docs/payload_format.md`](../../docs/payload_format.md).
 x(4) y(4) z(4)`. CRC is CCITT-FALSE (init `0xFFFF`) over the whole frame **except
 the crc field** (bytes 0–5 and 8–25).
 
-## TODO — blocked on the datasheets / hardware (see strategy §6)
-- **Q3 (radio part + board):** confirm the exact Wio-S3 LoRa radio and the
-  PlatformIO `board =` def; wire `RadioLib` `SX1262` for US915 in
-  `main.cpp` (replace `StubRadio`).
-- **Q4 (GNSS UART):** confirm the L76K UART pins + baud; begin the GNSS port in
-  `setup()` and drain it in `loop()` into `gnss_rx_byte()` (the NMEA parser is
-  already wired).
-- **Q5 (power wiring):** P1-Pro ↔ Wio-S3 power/interface (power-only use of the
-  P1-Pro).
-- **Sensor:** `read_sample()` is a placeholder — wire the real sensor read.
-- **Client forwarding:** the RX path currently logs to `Serial`; forward decoded
-  frames to the host (USB CDC / Wi-Fi / socket) per `software_requirements.md`.
+## TODO — hardware in hand (PoC on the Kit: XIAO ESP32-S3 + Wio-SX1262)
+- **DONE:** real SX1262 driver slotted in (`radio_sx1262.cpp`, RadioLib 7.x),
+  US915 / SF9 / 125 kHz / 17 dBm, wired behind the `Radio` interface in `main.cpp`
+  (replaces `StubRadio`). Device build green with the radio active.
+- **BENCH-VERIFY (PoC gate):** the 4 SX1262 **control pins** (CS/DIO1/BUSY/RST) in
+  `include/xiao_pins.hpp` are a best-guess; SPI (D8/D9/D10) is confirmed. On first
+  boot the firmware prints the pin map + `begin: OK/FAIL (RadioLib error N)`. If
+  FAIL, read the 4 real control pins off the Wio-SX1262-for-XIAO board/schematic
+  (PDF p.6) and fix them in `xiao_pins.hpp`, rebuild, reflash.
+- **Q4 (GNSS):** L76K confirmed UART @ 9600, D6/D7 — already wired in `main.cpp`.
+  Verify on the bench it locks and disciplines the clock.
+- **Sensor:** `read_sample()` is a placeholder (dummy sample) — wire the real
+  RM3100 + MCP9808 I2C reads once the radio link is proven.
+- **Client forwarding:** the RX path logs frames to `Serial` (USB CDC) and forwards
+  raw frame bytes; the host decodes 26 B → JSON. Wi-Fi/BLE config mode is a later
+  step (off in normal op for power).
 
 ## Radio configuration (US915, §15.247 — Q9 closed)
-When integrating the real SX1262: LoRa, **SF9 default** (213 ms @ 26 B),
-**125 kHz** BW, RX-invert-on, CRC on, frequency on a US915 uplink channel
-(923.3–927.5 MHz region). No TX duty cycle applies (verified; see
-`assets/fcc/README.md`). Antenna ≤ 2 dBi as certified — higher gain needs a
-proportional conducted-power backoff (> 6 dBi, no 902–928 P2P exemption).
+Set in `src/radio_sx1262.cpp` (`Sx1262Radio::begin()`): LoRa, **915.9 MHz**
+(a US915 channel; adjust per site), **SF9 default** (213 ms @ 26 B), **125 kHz**
+BW, coding rate 4/5, **17 dBm** out, preamble 8, explicit header (hardware CRC off
+— our CCITT CRC is authoritative). SF7 is used for faster backlog flush. No TX
+duty cycle applies (verified; see `assets/fcc/README.md`). Antenna ≤ 2 dBi as
+certified — higher gain needs a proportional conducted-power backoff (> 6 dBi, no
+902–928 P2P exemption).
