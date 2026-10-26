@@ -29,6 +29,7 @@ testing and monitoring.
 | `dist/`    | Build artifacts and packaged releases                        |
 | `kicad/`   | KiCad hardware design (carrier/support board)                |
 | `requirements/` | Original requirements source of truth                    |
+| `project-docs/` | Formal doc series: 00 requirements (REQ-IDs), 01 progress reports, 02 completion report |
 
 ## Status
 
