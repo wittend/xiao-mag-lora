@@ -3,7 +3,7 @@
 **Project:** xiao-mag-lora — solar-powered, GNSS clock-disciplined,
 point-to-point LoRa telemetry link.
 **Revision:** 1.0 — 2026-10-25 (structured back-fill of
-`requirements/xaio-mag-ora_requirements.md` and `software_requirements.md`;
+`requirements/xaio-mag-lora_requirements.md` and `software_requirements.md`;
 no requirement content changed).
 
 Statuses used below: *In development*, *Implemented (unverified)*,

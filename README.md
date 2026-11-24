@@ -11,7 +11,7 @@ testing and monitoring.
 
 ## Project Workflow (from `requirements/`)
 
-1. Write Requirements — `requirements/xaio-mag-ora_requirements.md`
+1. Write Requirements — `requirements/xaio-mag-lora_requirements.md`
 2. Generate a Hardware Strategy — `docs/hardware_strategy.md`
 3. Create an Overall Bill of Materials (BOM) — `docs/bom.md`
 4. Set Up Project Repository & Environment — this folder + `software_requirements.md`
