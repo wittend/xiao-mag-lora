@@ -1,0 +1,4 @@
+(fp_lib_table
+	(version 7)
+	(lib (name "RM3100-CB") (type "KiCad") (uri "${KIPRJMOD}/../assets/RM3100-CB.pretty") (options "") (descr "PNI RM3100-CB magnetometer board (module + pads-only footprints)"))
+)

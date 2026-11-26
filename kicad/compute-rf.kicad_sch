@@ -1,0 +1,21 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid de8c473d-1a9f-4e93-b720-5f4b0fadbdbc)
+	(paper "A4")
+	(title_block
+		(title "Compute & RF")
+		(date "2026-11-25")
+		(rev "0.1")
+		(company "Dave Witten")
+		(comment 1 "XIAO ESP32-S3 (Sense), Wio-SX1262, IPEX->SMA, RF ESD")
+	)
+	(lib_symbols)
+	(sheet_instances
+		(path "/de8c473d-1a9f-4e93-b720-5f4b0fadbdbc"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+)

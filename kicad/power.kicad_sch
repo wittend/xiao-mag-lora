@@ -1,0 +1,21 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid 19eceb6d-6ae4-4af6-9589-0d563b92ee3f)
+	(paper "A4")
+	(title_block
+		(title "Power subsystem")
+		(date "2026-11-25")
+		(rev "0.1")
+		(company "Dave Witten")
+		(comment 1 "P1(P)-Pro input, 5V/3V3 rails, battery sense, protection (scope pending teardown D1/D2)")
+	)
+	(lib_symbols)
+	(sheet_instances
+		(path "/19eceb6d-6ae4-4af6-9589-0d563b92ee3f"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+)

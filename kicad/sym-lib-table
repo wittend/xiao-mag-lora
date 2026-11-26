@@ -1,0 +1,5 @@
+(sym_lib_table
+	(version 7)
+	(lib (name "RM3100-CB") (type "KiCad") (uri "${KIPRJMOD}/../assets/RM3100-CB.kicad_sym") (options "") (descr "PNI RM3100-CB symbol (8-pin)"))
+	(lib (name "Seeed_Studio_XIAO_Series") (type "KiCad") (uri "/home/dave/Projects/KiCad-dev/OPL_Kicad_Library_(2026-06-23)/Seeed Studio XIAO Series Library/Seeed_Studio_XIAO_Series.kicad_sym") (options "") (descr "Seeed XIAO series symbols (OPL library checkout - machine-local path)"))
+)

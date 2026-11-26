@@ -1,0 +1,21 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid 405f822a-1ae7-49a3-8fb1-26cdd6ce481d)
+	(paper "A4")
+	(title_block
+		(title "Sensors")
+		(date "2026-11-25")
+		(rev "0.1")
+		(company "Dave Witten")
+		(comment 1 "RM3100-CB + MCP9808 (I2C D4/D5), pull-ups, ESD")
+	)
+	(lib_symbols)
+	(sheet_instances
+		(path "/405f822a-1ae7-49a3-8fb1-26cdd6ce481d"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+)

@@ -1,0 +1,21 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid 3ab50b54-5418-4a00-a08f-9bdcf4e8861f)
+	(paper "A4")
+	(title_block
+		(title "GNSS")
+		(date "2026-11-25")
+		(rev "0.1")
+		(company "Dave Witten")
+		(comment 1 "L76K (clock-only, UART D6/D7 @9600), GNSS antenna supply")
+	)
+	(lib_symbols)
+	(sheet_instances
+		(path "/3ab50b54-5418-4a00-a08f-9bdcf4e8861f"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+)

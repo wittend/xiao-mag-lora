@@ -1,0 +1,244 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "349f0991-719d-4b92-a25f-66e07abd2d5d")
+	(paper "A4")
+	(lib_symbols)
+	(sheet
+		(at 127 101.6)
+		(size 12.7 3.81)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "c5fb9b40-bd49-459d-9664-8c46e3166389")
+		(property "Sheetname" "Power"
+			(at 127 100.8884 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "power.kicad_sch"
+			(at 127 105.9946 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "xiao-carrier"
+				(path "/349f0991-719d-4b92-a25f-66e07abd2d5d"
+					(page "1")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 127 92.71)
+		(size 12.7 3.81)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "4d3c7615-7027-407c-ba5c-26a215452a37")
+		(property "Sheetname" "Compute & RF"
+			(at 127 91.9984 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "compute-rf.kicad_sch"
+			(at 127 97.1046 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "xiao-carrier"
+				(path "/349f0991-719d-4b92-a25f-66e07abd2d5d"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 127 83.82)
+		(size 12.7 3.81)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "647ff816-c8f3-402e-b811-74d0f20bd091")
+		(property "Sheetname" "GNSS"
+			(at 127 83.1084 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "gnss.kicad_sch"
+			(at 127 88.2146 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "xiao-carrier"
+				(path "/349f0991-719d-4b92-a25f-66e07abd2d5d"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 127 74.93)
+		(size 12.7 3.81)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "94eae9df-df27-4eae-8a92-9a82f898e45b")
+		(property "Sheetname" "Sensors"
+			(at 127 74.2184 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "sensors.kicad_sch"
+			(at 127 79.3246 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "xiao-carrier"
+				(path "/349f0991-719d-4b92-a25f-66e07abd2d5d"
+					(page "4")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 127 66.04)
+		(size 12.7 3.81)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "554ad9ba-d9d9-491a-97a6-e902dc06c0e2")
+		(property "Sheetname" "Status & I/O"
+			(at 127 65.3284 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "status.kicad_sch"
+			(at 127 70.4346 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "xiao-carrier"
+				(path "/349f0991-719d-4b92-a25f-66e07abd2d5d"
+					(page "5")
+				)
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "6")
+		)
+	)
+	(embedded_fonts no)
+)

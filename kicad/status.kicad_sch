@@ -1,0 +1,21 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid f8811c59-2cac-43b0-846a-dd7e0b442e66)
+	(paper "A4")
+	(title_block
+		(title "Status & I/O")
+		(date "2026-11-25")
+		(rev "0.1")
+		(company "Dave Witten")
+		(comment 1 "User LED, test points, provisioning hooks")
+	)
+	(lib_symbols)
+	(sheet_instances
+		(path "/f8811c59-2cac-43b0-846a-dd7e0b442e66"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+)
