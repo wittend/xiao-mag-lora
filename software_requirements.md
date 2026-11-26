@@ -3,6 +3,7 @@
 ## Firmware (on-node)
 
 - **MCU:** ESP32-S3 (Wio-S3 Wireless LoRa, XIAO form factor)
+  - Components off-the-shelf Seed Studio XIAO series where possible.
 - **Toolchain (decided):** PlatformIO, native custom firmware (P2P — no
   Meshtastic/LoRaWAN base). ESP-IDF only if lower-level work becomes
   necessary.
@@ -29,9 +30,8 @@
 
 ## Client-side (Linux host)
 
-- **Languages:** any combination of Go / C / C++ / Rust; prioritizing
-  security and portability across popular distributions (Debian, Ubuntu,
-  Fedora, Arch, RHEL).
+- **Languages:** any combination of Go / C / C++ / Rust; 
+	- prioritizing security and portability across popular distributions (Debian, Ubuntu, Fedora, Arch, RHEL).
 - **Responsibilities:**
   - Talk to node(s) over LoRa (a host LoRa radio) and/or WiFi/BT when in range
   - Node provisioning (region/channel/keys), firmware update, diagnostics
@@ -45,6 +45,7 @@
 
 ## SPA Web App (testing & monitoring)
 
+- Shared with sibling design ../wio-mag-lora.
 - Served by the client-side service (or standalone build consumed by it).
 - Features (v1):
   - Node status board: online/offline, battery %, clock-sync state
